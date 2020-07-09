@@ -7,5 +7,5 @@ D:\Project\XmlTable\XmlTable\obj\Debug\XmlTable.csproj.GenerateResource.cache
 D:\Project\XmlTable\XmlTable\obj\Debug\XmlTable.csproj.CoreCompileInputs.cache
 D:\Project\XmlTable\XmlTable\obj\Debug\XmlTable.exe
 D:\Project\XmlTable\XmlTable\obj\Debug\XmlTable.pdb
-D:\Project\XmlTable\XmlTable\obj\Debug\XmlTable.XmlTableEditor.resources
 D:\Project\XmlTable\XmlTable\obj\Debug\XmlTable.ColumnName.resources
+D:\Project\XmlTable\XmlTable\obj\Debug\XmlTable.XmlTableEditor.resources

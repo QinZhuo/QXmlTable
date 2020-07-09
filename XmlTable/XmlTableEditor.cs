@@ -11,12 +11,13 @@ using System.Xml;
 using System.Xml.Serialization;
 namespace XmlTable
 {
- 
+
     public partial class XmlTableEditor : Form
     {
         public static XmlTableEditor mainTable;
         //DataTable data;
         // XmlDocument xml;
+        XmlTableInfo tableInfo=new XmlTableInfo();
         public DataGridView gridView
         {
             get
@@ -51,14 +52,16 @@ namespace XmlTable
         }
         private void XmlTableEditor_Load(object sender, EventArgs e)
         {
-            string command = Environment.CommandLine;//获取进程命令行参数
-            string[] para = command.Split('\"');
-            if (para.Length > 3)
+           
+           
+            var infos = Environment.GetCommandLineArgs();
+            if (infos.Length > 1)
             {
-                string pathC = para[3];
+                string pathC = infos[1];
                 OpenXml(pathC);
             }
             mainTable = this;
+            
         }
         private void ParseInnerXml(int col,int row, string xmlstr)
         {
@@ -166,14 +169,16 @@ namespace XmlTable
                         {
                             if (!innerData.data.Columns.Contains(DataTableExtend.IndexCol))
                             {
-                                innerData.data.Columns.Add(DataTableExtend.IndexCol,typeof(int));
+                                var col= innerData.data.Columns.Add(DataTableExtend.IndexCol,typeof(int));
+                              
                             }
                             innerData.data.Rows[x][DataTableExtend.IndexCol] = x;
                         }
                             if (!innerData.data.Columns.Contains(cell.Name))
                             {
-                                innerData.data.Columns.Add(cell.Name,GetType(cell,cell.Name));
-                            }
+                                var col= innerData.data.Columns.Add(cell.Name,GetType(cell,cell.Name));
+                             
+                        }
                             innerData.data.Rows[x][cell.Name] = cell.InnerXml;
                        
                         y++;
@@ -218,26 +223,102 @@ namespace XmlTable
             tableView.Columns[DataTableExtend.IndexCol].Visible = false;
             Loading = false;
         }
+       
+        public void CheckViewType( int i, int j)
+        {
+            var col = tableView.Columns[i];
+            var colInfo = tableInfo[col.Name];
+            CheckViewType(colInfo, i, j);
+        }
+        private void CheckViewType(ColInfo colInfo, int i, int j)
+        {
+            if (i <= 0 || j < 0 || j >= tableView.RowCount - 1)
+            {
+                return;
+            }
+            if (colInfo != null)
+            {
+
+            
+                switch (colInfo.type)
+                {
+                    case ViewType.文字:
+                        if (!(tableView[i, j] is TextCell))
+                        {
+
+                            tableView[i, j] = new TextCell();
+                        }
+                        break;
+                    case ViewType.下拉框:
+                        if (!(tableView[i, j] is DropDownCell))
+                        {
+                            if (string.IsNullOrWhiteSpace(tableView[i, j].Value.ToString()))
+                            {
+                                if (colInfo.values.Length > 0)
+                                {
+                                    tableView[i, j].Value = colInfo.values[0];
+                                }
+                            }
+                            
+                            if (colInfo.values.Contains(tableView[i, j].Value.ToString()))
+                            {
+                                
+                                tableView[i, j] = new DropDownCell()
+                                {
+                                    DataSource = colInfo.values
+                                };
+                            }
+                        }
+
+                        break;
+                    case ViewType.按钮:
+
+                        if (!(tableView[i, j] is InnerXmlCell))
+                        {
+
+                            tableView[i, j] = new InnerXmlCell();
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                if (!(tableView[i, j] is TextCell))
+                {
+                    tableView[i, j] = new TextCell();
+                }
+            }
+            if (i != 0)
+            {
+                var flag = IsXml(tableView.Rows[j].Cells[i].Value.ToString());
+                if (flag)
+                {
+                    tableView[i, j] = new InnerXmlCell();
+                }
+                tableView[i, j].ReadOnly = flag;
+
+            }
+        }
         private void CheckReadOnly()
         {
             for (int i = 0; i < tableView.ColumnCount; i++)
             {
+                var col = tableView.Columns[i];
                 //tableView.Columns[i].SortMode = DataGridViewColumnSortMode.Automatic;
                 if (tableView.Columns[i].Name==DataTableExtend.IndexCol)
                 {
                     tableView.Columns[i].ReadOnly = true;
                     tableView.Columns[i].Width = 50;
                 }
+                var colInfo = tableInfo[tableView.Columns[i].Name];
+              
                 for (int j = 0; j < tableView.RowCount; j++)
                 {
                     if (tableView.Rows[j].Cells[i].Value != null)
                     {
-                     
-                        if (i != 0)
-                        {
-                            tableView[i, j].ReadOnly = IsXml(tableView.Rows[j].Cells[i].Value.ToString());
-                        }
-                       
+                        CheckViewType(colInfo,i,j);
                     }
                    
                 }
@@ -270,6 +351,10 @@ namespace XmlTable
         {
             xmlPath = path;
             var xmlstr = FileManager.Load(path);
+            if(System.IO.File.Exists(path + ".tableInfo")){
+                tableInfo = FileManager.Deserialize<XmlTableInfo>( FileManager.Load(path + ".tableInfo"));
+            }
+          
             ParseRootXml(xmlstr);
         }
         private void openXmlFileDialog_FileOk(object sender, CancelEventArgs e)
@@ -310,11 +395,18 @@ namespace XmlTable
 
         private void tableView_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
         {
+         
+      
+
             if (e.ColumnIndex < 0 || e.RowIndex < 0||e.RowIndex>=tableView.Rows.Count-1)
             {
                 return;
             }
+
+           
             var cell = tableView[e.ColumnIndex, e.RowIndex];
+            //    var rect = cell.ContentBounds;
+          
             if (cell.ReadOnly)
             {
                 ParseInnerXml(cell.ColumnIndex ,tableView.GetRowIndex(e.RowIndex),cell.Value.ToString());
@@ -326,6 +418,7 @@ namespace XmlTable
         //int selectRow;
         private void tableView_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
         {
+      
             //if (e.ColumnIndex >= 0 && e.RowIndex >= 0)
             //{
             //    selectRow =e.RowIndex;
@@ -395,6 +488,7 @@ namespace XmlTable
             if (!isEditMode)
             {
                 CopyData.Pause(Clipboard.GetText(), tableView);
+               
                 statusLabel.Text = "粘贴成功";
             }
         }
@@ -444,10 +538,12 @@ namespace XmlTable
             CopyToolStripMenuItem.Enabled = true;
             pasteToolStripMenuItem.Enabled = true;
             statusLabel.Text = "结束编辑单元格";
+            CheckViewType(e.ColumnIndex, e.RowIndex);
         }
 
         private void tableView_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
+           
         }
 
         private void tableView_SortCompare(object sender, DataGridViewSortCompareEventArgs e)
@@ -476,14 +572,17 @@ namespace XmlTable
 
         private void tableView_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
+          
             //try
             //{
             if (Loading) return;
             //MessageBox.Show("e:" + (e.RowIndex-1));
-            if (e.RowIndex - 1 < 0) return;
-            if(string.IsNullOrWhiteSpace(tableView.Rows[e.RowIndex - 1].Cells[DataTableExtend.IndexCol].Value.ToString())){
-                tableView.Rows[e.RowIndex - 1].Cells[DataTableExtend.IndexCol].Value = e.RowIndex - 1;
-                tableView.Rows[e.RowIndex - 1].Cells[DataTableExtend.IndexCol].ReadOnly = true;
+          
+            var row= tableView.RowCount-1;
+            if (row <= 0) return;
+            if (string.IsNullOrWhiteSpace(tableView.Rows[row - 1].Cells[DataTableExtend.IndexCol].Value.ToString())){
+                tableView.Rows[row - 1].Cells[DataTableExtend.IndexCol].Value = e.RowIndex - 1;
+                tableView.Rows[row - 1].Cells[DataTableExtend.IndexCol].ReadOnly = true;
             }
             //}
             //catch (Exception)
@@ -493,6 +592,11 @@ namespace XmlTable
             //}
 
 
+        }
+
+        private void tableView_DataError(object sender, DataGridViewDataErrorEventArgs e)
+        {
+            
         }
     }
 
@@ -522,7 +626,16 @@ namespace XmlTable
         public static int GetRowIndex(this DataGridView tableView, int row)
         {
             //MessageBox.Show("索引【" + row + "】=>【" + int.Parse(tableView[IndexCol, row].Value.ToString()) + "】");
-            return int.Parse(tableView[IndexCol, row].Value.ToString());
+            try
+            {
+                return int.Parse(tableView[IndexCol, row].Value.ToString());
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("获取索引出错 ["+ tableView[IndexCol, row].Value+"]");
+                throw;
+            }
+          
         }
         public static string IndexCol = "#index#";
     }
@@ -585,18 +698,21 @@ namespace XmlTable
         {
             return FileManager.Serialize(new CopyData(cells));
         }
+    
         public static void Pause(string copyData,DataGridView tableView)
         {
             CopyData data = null;
+            var cells = tableView.SelectedCells;
             try
             {
                 data = FileManager.Deserialize<CopyData>(copyData);
             }
             catch (Exception)
             {
+                cells[0].ChangeValue(copyData);
                 return;
             }
-            var cells = tableView.SelectedCells;
+            
             List<DataGridViewCell> ignoreList = new List<DataGridViewCell>();
             for (int i = cells.Count-1; i >=0 ; i--)
             {
@@ -609,47 +725,7 @@ namespace XmlTable
                     try
                     {
                         DataGridViewCell offsetCell = tableView[cell.ColumnIndex + cellData.col, cell.RowIndex + cellData.row];
-                        if (offsetCell.OwningColumn.Name == DataTableExtend.IndexCol)
-                        {
-                            continue;
-                        }
-                        if(offsetCell.RowIndex>= tableView.Rows.Count-1)
-                        {
-                            continue;
-                        }
-                        var intValue = 0;
-                        if (string.IsNullOrWhiteSpace(cellData.value))
-                        {
-                            offsetCell.Value = DBNull.Value;
-                        }
-                        else
-                        {
-                            if (offsetCell.ValueType== typeof(int))
-                            {
-                                if (int.TryParse(cellData.value, out intValue))
-                                {
-                                    offsetCell.Value = intValue;
-                                }
-                                //else
-                                //{
-                                //    try
-                                //    {
-                                //        offsetCell.Value = cellData.value;
-                                //    }
-                                //    catch (Exception)
-                                //    {
-                                //    }
-
-                                //}
-                            }
-                            else
-                            {
-                                offsetCell.Value = cellData.value;
-                            }
-                          
-
-                        }
-
+                        offsetCell.ChangeValue(cellData.value);
                         ignoreList.Add(offsetCell);
                         offsetCell.ReadOnly = XmlTableEditor.IsXml(offsetCell.Value.ToString());
                     }

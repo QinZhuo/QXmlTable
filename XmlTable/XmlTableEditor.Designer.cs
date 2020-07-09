@@ -74,6 +74,7 @@
             this.tableView.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.tableView_CellEndEdit);
             this.tableView.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.tableView_CellMouseDoubleClick);
             this.tableView.CellMouseDown += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.tableView_CellMouseDown);
+            this.tableView.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.tableView_DataError);
             this.tableView.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.tableView_RowsAdded);
             this.tableView.SortCompare += new System.Windows.Forms.DataGridViewSortCompareEventHandler(this.tableView_SortCompare);
             this.tableView.Sorted += new System.EventHandler(this.tableView_Sorted);
