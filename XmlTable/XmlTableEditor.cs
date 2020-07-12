@@ -17,7 +17,7 @@ namespace XmlTable
         public static XmlTableEditor mainTable;
         //DataTable data;
         // XmlDocument xml;
-        XmlTableInfo tableInfo=new XmlTableInfo();
+        public XmlTableInfo tableInfo=new XmlTableInfo();
         public DataGridView gridView
         {
             get
@@ -25,21 +25,15 @@ namespace XmlTable
                 return tableView;
             }
         }
-        string xmlPath;
+        public string xmlPath;
+        public string folderPath;
         XmlDocument xmlDoc;
-        Stack<InnerData> innerDataList;
         bool Loading = true;
-        InnerData curData
-        {
-            get
-            {
-                return innerDataList.Peek();
-            }
-        }
+        InnerData curData;
+
         public XmlTableEditor()
         {
             InitializeComponent();
-            innerDataList =new Stack<InnerData>();
         }
         public bool ColumnName(string name)
         {
@@ -55,12 +49,13 @@ namespace XmlTable
            
            
             var infos = Environment.GetCommandLineArgs();
+            mainTable = this;
             if (infos.Length > 1)
             {
                 string pathC = infos[1];
                 OpenXml(pathC);
             }
-            mainTable = this;
+       
             
         }
         private void ParseInnerXml(int col,int row, string xmlstr)
@@ -70,18 +65,18 @@ namespace XmlTable
             var data = new DataTable();
           
             xmlDoc.LoadXml(" <子单元格编辑>" + xmlstr+ "</子单元格编辑>");
-            var innerData = new InnerData()
+            var innerData = new InnerData(curData)
             {
                 data = data,
                 col = col,
                 row = row,
                 xml = xmlDoc,
                 xmlDoc=xmlDoc,
+                _path=curData.data.Columns[col].ColumnName,
             };
+            curData = innerData;
             ParseXml(innerData);
-            innerDataList.Push(innerData);
            
-
 
         }
         public static bool IsXml(string str)
@@ -177,7 +172,7 @@ namespace XmlTable
                             if (!innerData.data.Columns.Contains(cell.Name))
                             {
                                 var col= innerData.data.Columns.Add(cell.Name,GetType(cell,cell.Name));
-                             
+                 
                         }
                             innerData.data.Rows[x][cell.Name] = cell.InnerXml;
                        
@@ -227,16 +222,18 @@ namespace XmlTable
         public void CheckViewType( int i, int j)
         {
             var col = tableView.Columns[i];
-            var colInfo = tableInfo[col.Name];
+            var colInfo = tableInfo[curData.Path+col.Name];
             CheckViewType(colInfo, i, j);
         }
-        private void CheckViewType(ColInfo colInfo, int i, int j)
+        private bool CheckViewType(ColInfo colInfo, int i, int j)
         {
-            if (i <= 0 || j < 0 || j >= tableView.RowCount - 1)
+          
+            if (i < 0 || j < 0 || j >= tableView.RowCount - 1)
             {
-                return;
+                return false;
             }
-            if (colInfo != null)
+          
+            if (colInfo != null&&!string.IsNullOrWhiteSpace( tableView[i, j].Value.ToString()))
             {
 
             
@@ -249,24 +246,24 @@ namespace XmlTable
                             tableView[i, j] = new TextCell();
                         }
                         break;
+                    case ViewType.表索引:
                     case ViewType.下拉框:
+                   //     MessageBox.Show("下拉框" + tableView[i, j].Value);
                         if (!(tableView[i, j] is DropDownCell))
                         {
-                            if (string.IsNullOrWhiteSpace(tableView[i, j].Value.ToString()))
+                            if (colInfo.Contains( tableView[i, j].Value.ToString()))
                             {
-                                if (colInfo.values.Length > 0)
-                                {
-                                    tableView[i, j].Value = colInfo.values[0];
-                                }
-                            }
-                            
-                            if (colInfo.values.Contains(tableView[i, j].Value.ToString()))
-                            {
-                                
+
                                 tableView[i, j] = new DropDownCell()
                                 {
+                                    colInfo = colInfo,
                                     DataSource = colInfo.values
                                 };
+                             //   MessageBox.Show("" + tableView[i, j].Value);
+                            }
+                            else
+                            {
+                           //    MessageBox.Show("不存在" + tableView[i, j].Value);
                             }
                         }
 
@@ -290,21 +287,28 @@ namespace XmlTable
                     tableView[i, j] = new TextCell();
                 }
             }
+            var flag = false;
             if (i != 0)
             {
-                var flag = IsXml(tableView.Rows[j].Cells[i].Value.ToString());
+                flag = IsXml(tableView.Rows[j].Cells[i].Value.ToString());
+             
                 if (flag)
                 {
+                   
                     tableView[i, j] = new InnerXmlCell();
                 }
                 tableView[i, j].ReadOnly = flag;
-
+              
             }
+            return flag;
         }
         private void CheckReadOnly()
         {
+           
+
             for (int i = 0; i < tableView.ColumnCount; i++)
             {
+                bool isXmlCol=false;
                 var col = tableView.Columns[i];
                 //tableView.Columns[i].SortMode = DataGridViewColumnSortMode.Automatic;
                 if (tableView.Columns[i].Name==DataTableExtend.IndexCol)
@@ -312,26 +316,34 @@ namespace XmlTable
                     tableView.Columns[i].ReadOnly = true;
                     tableView.Columns[i].Width = 50;
                 }
-                var colInfo = tableInfo[tableView.Columns[i].Name];
+                var colInfo = tableInfo[curData.Path+tableView.Columns[i].Name];
               
                 for (int j = 0; j < tableView.RowCount; j++)
                 {
+        
                     if (tableView.Rows[j].Cells[i].Value != null)
                     {
-                        CheckViewType(colInfo,i,j);
+
+                        if(CheckViewType(colInfo, i, j))
+                        {
+                            isXmlCol = true;
+                        }
                     }
-                   
+                }
+                if (!isXmlCol)
+                {
+                    tableView.AutoResizeColumn(i, DataGridViewAutoSizeColumnMode.DisplayedCells);
                 }
             }
         }
         private void ParseRootXml(string xmlstr)
         {
-            innerDataList.Clear();
+        
             xmlDoc = new XmlDocument();
             var data = new DataTable();
             xmlDoc.LoadXml(xmlstr);
             Text = xmlDoc.LastChild.Name + " - XmlViewer";
-            var innerData = new InnerData()
+            var innerData = new InnerData(null)
             {
                 data = data,
                 xmlDoc=xmlDoc,
@@ -339,8 +351,8 @@ namespace XmlTable
                 row = -1,
                 xml = xmlDoc,
             };
+            curData = innerData;
             ParseXml(innerData);
-            innerDataList.Push(innerData);
         }
         private void SaveXmlFile()
         {
@@ -350,6 +362,8 @@ namespace XmlTable
         private void OpenXml(string path)
         {
             xmlPath = path;
+            folderPath = path.Substring(0, xmlPath.LastIndexOf('\\'));
+         
             var xmlstr = FileManager.Load(path);
             if(System.IO.File.Exists(path + ".tableInfo")){
                 tableInfo = FileManager.Deserialize<XmlTableInfo>( FileManager.Load(path + ".tableInfo"));
@@ -378,9 +392,10 @@ namespace XmlTable
                tableView.EndEdit();
             }
           
-            if (innerDataList.Count > 1)
+            if (curData.parent!=null)
             {
-                var innerData = innerDataList.Pop();
+                var innerData = curData;
+                curData = curData.parent;
                 curData.data.GetRow(innerData.row)[innerData.col] = innerData.UpdateChange().InnerXml;
                 tableView.DataSource = curData.data;
                 CheckReadOnly();
@@ -414,43 +429,9 @@ namespace XmlTable
         }
 
 
-       // string selectCol;
-        //int selectRow;
         private void tableView_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
         {
       
-            //if (e.ColumnIndex >= 0 && e.RowIndex >= 0)
-            //{
-            //    selectRow =e.RowIndex;
-            //    selectCol = tableView.Columns[e.ColumnIndex].Name;
-            //    statusLabel.Text = "选择表格【" + selectRow + "," + selectCol + "】";
-              
-            //  //  deleteRowToolStripMenuItem.Enabled = false;
-            //}
-            //else
-            //{
-            //    selectCol ="";
-            //    if (e.ColumnIndex < 0 && e.RowIndex < 0)
-            //    {
-            //        statusLabel.Text = "";
-            //    }
-            //    else if(e.ColumnIndex<0)
-            //    {
-                    
-            //        selectRow =e.RowIndex;
-            //        statusLabel.Text = "选择【" + selectRow + "】行";
-            //        //   deleteRowToolStripMenuItem.Enabled = true;
-            //    }
-            //    else if(e.RowIndex<0)
-            //    {
-                 
-            //        selectRow = -1;
-            //        selectCol = tableView.Columns[e.ColumnIndex].Name;
-            //        statusLabel.Text = "选择【" + selectCol + "】列";
-            //    }
-               
-                   
-            //}
         }
 
         private void statusStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
@@ -501,7 +482,7 @@ namespace XmlTable
                 {
                     if (tableView.Columns[cell.ColumnIndex].Name != DataTableExtend.IndexCol)
                     {
-                        cell.Value = DBNull.Value;
+                        cell.ChangeValue("");
                     }
                 }
             }
@@ -750,6 +731,24 @@ namespace XmlTable
         public XmlNode xml;
         public XmlDocument xmlDoc;
         public GridType gridType;
+        public InnerData parent;
+        public string Path
+        {
+             get
+            {
+                if (parent == null)
+                {
+                    
+                    return string.IsNullOrEmpty(_path)?"":_path+".";
+                }
+                return parent.Path+_path+".";
+            }
+        }
+        public string _path;
+        public InnerData(InnerData parent)
+        {
+            this.parent = parent;
+        }
         public XmlNode UpdateChange()
         {
             var root = xml.LastChild;
