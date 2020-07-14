@@ -48,6 +48,7 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.bindingSource1 = new System.Windows.Forms.BindingSource(this.components);
+            this.查找ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.tableView)).BeginInit();
             this.menu.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -151,7 +152,8 @@
             this.CopyToolStripMenuItem,
             this.pasteToolStripMenuItem,
             this.AddColumnToolStripMenuItem,
-            this.deleteColumntoolStripMenuItem});
+            this.deleteColumntoolStripMenuItem,
+            this.查找ToolStripMenuItem});
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
             this.editToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
             this.editToolStripMenuItem.Size = new System.Drawing.Size(44, 21);
@@ -161,7 +163,7 @@
             // 
             this.deleteRowToolStripMenuItem.Name = "deleteRowToolStripMenuItem";
             this.deleteRowToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
-            this.deleteRowToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.deleteRowToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.deleteRowToolStripMenuItem.Text = "删除";
             this.deleteRowToolStripMenuItem.Click += new System.EventHandler(this.deleteRowToolStripMenuItem_Click);
             // 
@@ -169,7 +171,7 @@
             // 
             this.CopyToolStripMenuItem.Name = "CopyToolStripMenuItem";
             this.CopyToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.CopyToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.CopyToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.CopyToolStripMenuItem.Text = "复制";
             this.CopyToolStripMenuItem.Click += new System.EventHandler(this.CopyToolStripMenuItem_Click);
             // 
@@ -177,21 +179,21 @@
             // 
             this.pasteToolStripMenuItem.Name = "pasteToolStripMenuItem";
             this.pasteToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
-            this.pasteToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.pasteToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.pasteToolStripMenuItem.Text = "粘贴";
             this.pasteToolStripMenuItem.Click += new System.EventHandler(this.pasteToolStripMenuItem_Click);
             // 
             // AddColumnToolStripMenuItem
             // 
             this.AddColumnToolStripMenuItem.Name = "AddColumnToolStripMenuItem";
-            this.AddColumnToolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.AddColumnToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.AddColumnToolStripMenuItem.Text = "添加列";
             this.AddColumnToolStripMenuItem.Click += new System.EventHandler(this.AddColumnToolStripMenuItem_Click);
             // 
             // deleteColumntoolStripMenuItem
             // 
             this.deleteColumntoolStripMenuItem.Name = "deleteColumntoolStripMenuItem";
-            this.deleteColumntoolStripMenuItem.Size = new System.Drawing.Size(145, 22);
+            this.deleteColumntoolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.deleteColumntoolStripMenuItem.Text = "删除列";
             this.deleteColumntoolStripMenuItem.Click += new System.EventHandler(this.deleteColumntoolStripMenuItem_Click);
             // 
@@ -212,6 +214,14 @@
             this.statusLabel.Name = "statusLabel";
             this.statusLabel.Size = new System.Drawing.Size(12, 17);
             this.statusLabel.Text = " ";
+            // 
+            // 查找ToolStripMenuItem
+            // 
+            this.查找ToolStripMenuItem.Name = "查找ToolStripMenuItem";
+            this.查找ToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
+            this.查找ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.查找ToolStripMenuItem.Text = "查找";
+            this.查找ToolStripMenuItem.Click += new System.EventHandler(this.查找ToolStripMenuItem_Click);
             // 
             // XmlTableEditor
             // 
@@ -260,6 +270,7 @@
         private System.Windows.Forms.BindingSource bindingSource1;
         private System.Windows.Forms.ToolStripMenuItem AddColumnToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deleteColumntoolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 查找ToolStripMenuItem;
     }
 }
 

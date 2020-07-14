@@ -578,7 +578,56 @@ namespace XmlTable
 
 
         }
+        public DataGridViewCell Find(string str)
+        {
+            bool startFind = gridView.CurrentCell == null;
+            var startCell = gridView.CurrentCell;
+            foreach (DataGridViewRow col in tableView.Rows)
+            {
+                foreach (DataGridViewCell cell in col.Cells)
+                {
+                   
+                    if (startFind)
+                    {
+                        if (cell.Value!=null&&cell.Value.ToString().Contains(str))
+                        {
+                            return cell;
+                        }
+                    }
+                    else
+                    {
+                        if (cell == gridView.CurrentCell)
+                        {
+                            startFind = true;
+                        }
+                    }
+                   
+                }
+            }
+            if (startFind)
+            {
+                foreach (DataGridViewRow col in tableView.Rows)
+                {
+                    foreach (DataGridViewCell cell in col.Cells)
+                    {
 
+                        if (startFind)
+                        {
+                            if (cell == startCell)
+                            {
+                                return null;
+                            }
+                            if (cell.Value.ToString().Contains(str))
+                            {
+                                return cell;
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
+          
+        }
         private void tableView_DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
             
@@ -600,6 +649,21 @@ namespace XmlTable
         }
         private void XmlTableEditor_Deactivate(object sender, EventArgs e)
         {
+        }
+        Finder finder;
+        private void 查找ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (finder == null)
+            {
+                finder = new Finder();
+               
+            }
+            else if (!finder.Visible)
+            {
+               
+                     finder.ShowDialog();
+            }
+         
         }
     }
 
@@ -730,7 +794,7 @@ namespace XmlTable
                         DataGridViewCell offsetCell = tableView[cell.ColumnIndex + cellData.col, cell.RowIndex + cellData.row];
                         offsetCell.ChangeValue(cellData.value);
                         ignoreList.Add(offsetCell);
-                
+                    
                   
                 }
 
