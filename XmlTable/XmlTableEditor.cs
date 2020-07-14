@@ -27,6 +27,7 @@ namespace XmlTable
         }
         public string xmlPath;
         public string folderPath;
+        public DateTimeOffset fileChangeTime;
         XmlDocument xmlDoc;
         bool Loading = true;
         InnerData curData;
@@ -357,15 +358,18 @@ namespace XmlTable
         private void SaveXmlFile()
         {
             xmlDoc.Save(xmlPath);
-            statusLabel.Text = "文件保存成功【" + xmlPath + "】";
+            fileChangeTime = System.IO.File.GetLastWriteTimeUtc(xmlPath);
+            statusLabel.Text = "文件保存成功【" + xmlPath + "】"+ fileChangeTime;
         }
         private void OpenXml(string path)
         {
             xmlPath = path;
             folderPath = path.Substring(0, xmlPath.LastIndexOf('\\'));
-         
+
+            fileChangeTime = System.IO.File.GetLastWriteTimeUtc(path);
             var xmlstr = FileManager.Load(path);
             if(System.IO.File.Exists(path + ".tableInfo")){
+             
                 tableInfo = FileManager.Deserialize<XmlTableInfo>( FileManager.Load(path + ".tableInfo"));
             }
           
@@ -579,6 +583,24 @@ namespace XmlTable
         {
             
         }
+
+        private void XmlTableEditor_Activated(object sender, EventArgs e)
+        {
+            if(!string.IsNullOrWhiteSpace(xmlPath))
+            {
+                var newTime = System.IO.File.GetLastWriteTimeUtc(xmlPath);
+                if (newTime != fileChangeTime)
+                {
+                    OpenXml(xmlPath);
+                    MessageBox.Show("文件在外部发生了更改自动读取修改内容");
+                }
+                
+            }
+            
+        }
+        private void XmlTableEditor_Deactivate(object sender, EventArgs e)
+        {
+        }
     }
 
     public enum GridType
@@ -698,22 +720,17 @@ namespace XmlTable
             for (int i = cells.Count-1; i >=0 ; i--)
             {
                 var cell = cells[i];
+                if (cell.ReadOnly) continue;
                 if (ignoreList.Contains(cell)) continue;
 
                 foreach (var cellData in data.cellList)
                 {
                     //tableView[cell.RowIndex + cellData.row, cell.ColumnIndex + cellData.col];
-                    try
-                    {
+                  
                         DataGridViewCell offsetCell = tableView[cell.ColumnIndex + cellData.col, cell.RowIndex + cellData.row];
                         offsetCell.ChangeValue(cellData.value);
                         ignoreList.Add(offsetCell);
-                        offsetCell.ReadOnly = XmlTableEditor.IsXml(offsetCell.Value.ToString());
-                    }
-                    catch (Exception)
-                    {
-                        continue;
-                    }
+                
                   
                 }
 

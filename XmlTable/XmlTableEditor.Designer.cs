@@ -226,6 +226,8 @@
             this.MainMenuStrip = this.menu;
             this.Name = "XmlTableEditor";
             this.Text = "XmlViewer";
+            this.Activated += new System.EventHandler(this.XmlTableEditor_Activated);
+            this.Deactivate += new System.EventHandler(this.XmlTableEditor_Deactivate);
             this.Load += new System.EventHandler(this.XmlTableEditor_Load);
             ((System.ComponentModel.ISupportInitialize)(this.tableView)).EndInit();
             this.menu.ResumeLayout(false);

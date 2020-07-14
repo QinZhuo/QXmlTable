@@ -57,6 +57,12 @@
       <DependentUpon>ColumnName.cs</DependentUpon>
     </Compile>
     <Compile Include="FileManager.cs" />
+    <Compile Include="Finder.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Finder.Designer.cs">
+      <DependentUpon>Finder.cs</DependentUpon>
+    </Compile>
     <Compile Include="XmlTableEditor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -67,6 +73,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="ColumnName.resx">
       <DependentUpon>ColumnName.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Finder.resx">
+      <DependentUpon>Finder.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="XmlTableEditor.resx">
       <DependentUpon>XmlTableEditor.cs</DependentUpon>
