@@ -92,6 +92,13 @@ namespace XmlTable
             }
             return value;
         }
+        public string TablePath
+        {
+            get
+            {
+                return XmlTableEditor.mainTable.folderPath + '\\' + typeValues[0];
+            }
+        }
         public void Init()
         {
             values.Clear();
@@ -115,7 +122,7 @@ namespace XmlTable
                             break;
                         }
                         XmlDocument xmlDoc = new XmlDocument();
-                        xmlDoc.Load(XmlTableEditor.mainTable.folderPath + '\\' + typeValues[0]);
+                        xmlDoc.Load(TablePath);
                         var nodes = xmlDoc.SelectNodes("//" + typeValues[1]);
                         foreach (XmlNode node in nodes)
                         {

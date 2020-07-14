@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
@@ -14,6 +17,10 @@ namespace XmlTable
 
     public partial class XmlTableEditor : Form
     {
+        [DllImport("user32.dll")]
+        public static extern IntPtr FindWindow(String classname, String title);
+        [DllImport("user32.dll")]
+        public static extern void SetForegroundWindow(IntPtr hwnd);
         public static XmlTableEditor mainTable;
         //DataTable data;
         // XmlDocument xml;
@@ -45,10 +52,9 @@ namespace XmlTable
             }
             return false;
         }
+       
         private void XmlTableEditor_Load(object sender, EventArgs e)
         {
-           
-           
             var infos = Environment.GetCommandLineArgs();
             mainTable = this;
             if (infos.Length > 1)
@@ -56,8 +62,19 @@ namespace XmlTable
                 string pathC = infos[1];
                 OpenXml(pathC);
             }
-       
+            if (infos.Length > 2)
+            {
+                var findStr = infos[2];
+                    FindAndSelect(findStr);
+              
+            }
             
+
+
+        }
+
+        private void tableView_DataSourceChanged(object sender, EventArgs e)
+        {
         }
         private void ParseInnerXml(int col,int row, string xmlstr)
         {
@@ -430,12 +447,22 @@ namespace XmlTable
             {
                 ParseInnerXml(cell.ColumnIndex ,tableView.GetRowIndex(e.RowIndex),cell.Value.ToString());
             }
+            var info = tableInfo[cell.OwningColumn.Name];
+            if (info != null&& cell.Value!=null&&!string.IsNullOrEmpty(cell.Value.ToString()))
+            {
+                if(info.type== ViewType.表索引)
+                {
+                    var process= Process.Start(Process.GetCurrentProcess().MainModule.FileName, info.TablePath+" "+cell.Value);
+                    SetForegroundWindow(FindWindow( null,process.MainWindowTitle));
+                    
+                }
+            }
         }
 
 
         private void tableView_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
         {
-      
+        
         }
 
         private void statusStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
@@ -449,20 +476,6 @@ namespace XmlTable
             {
 
                 Clipboard.SetText(CopyData.Copy(tableView.SelectedCells));
-                //if (!string.IsNullOrWhiteSpace(selectCol))
-                //{
-                //    string text = tableView.SelectedCells[0].Value.ToString();
-                //    //if (text == "")
-                //    //{
-                //    //    Clipboard.SetDataObject("");
-                //    //   // Clipboard.SetText(" ");
-                //    //}
-                //    //else
-                //    //{
-                        
-                //    //}
-                    
-                //}
                 statusLabel.Text = "复制成功";
             }
            
@@ -578,7 +591,22 @@ namespace XmlTable
 
 
         }
-        public DataGridViewCell Find(string str)
+
+        public void FindAndSelect(string str)
+        {
+            var cell = XmlTableEditor.mainTable.FindCell(str);
+            if (cell != null)
+            {
+                XmlTableEditor.mainTable.gridView.ClearSelection();
+                cell.Selected = true;
+                XmlTableEditor.mainTable.gridView.CurrentCell = cell;
+            }
+            else
+            {
+                MessageBox.Show("未找到[" + str + "]");
+            }
+        }
+    public DataGridViewCell FindCell(string str)
         {
             bool startFind = gridView.CurrentCell == null;
             var startCell = gridView.CurrentCell;
@@ -645,7 +673,7 @@ namespace XmlTable
                 }
                 
             }
-            
+           
         }
         private void XmlTableEditor_Deactivate(object sender, EventArgs e)
         {
@@ -663,6 +691,11 @@ namespace XmlTable
                
                      finder.ShowDialog();
             }
+         
+        }
+
+        private void tableView_RowPostPaint(object sender, DataGridViewRowPostPaintEventArgs e)
+        {
          
         }
     }

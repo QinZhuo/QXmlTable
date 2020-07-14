@@ -20,17 +20,8 @@ namespace XmlTable
         private void findButton_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(findInput.Text)) return;
-            var cell= XmlTableEditor.mainTable.Find(findInput.Text);
-            if (cell != null)
-            {
-                XmlTableEditor.mainTable.gridView.ClearSelection();
-                cell.Selected = true;
-                XmlTableEditor.mainTable.gridView.CurrentCell = cell;
-            }
-            else
-            {
-                MessageBox.Show("未找到[" + findInput.Text + "]");
-            }
+             XmlTableEditor.mainTable.FindAndSelect(findInput.Text);
+          
         }
     }
 }
