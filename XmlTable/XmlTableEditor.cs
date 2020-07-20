@@ -68,7 +68,8 @@ namespace XmlTable
                     FindAndSelect(findStr);
               
             }
-            
+            gridView.RowsDefaultCellStyle.BackColor = Color.WhiteSmoke;
+            gridView.AlternatingRowsDefaultCellStyle.BackColor = Color.White;
 
 
         }

@@ -49,6 +49,7 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.bindingSource1 = new System.Windows.Forms.BindingSource(this.components);
+            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.tableView)).BeginInit();
             this.menu.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -225,6 +226,11 @@
             this.statusLabel.Size = new System.Drawing.Size(12, 17);
             this.statusLabel.Text = " ";
             // 
+            // dataGridViewTextBoxColumn1
+            // 
+            this.dataGridViewTextBoxColumn1.HeaderText = "测试1";
+            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            // 
             // XmlTableEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -273,6 +279,7 @@
         private System.Windows.Forms.ToolStripMenuItem AddColumnToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem deleteColumntoolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 查找ToolStripMenuItem;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
     }
 }
 
