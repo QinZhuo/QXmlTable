@@ -185,10 +185,30 @@ namespace XmlTable
     }
     public class InnerXmlCell: DataGridViewButtonCell
     {
+   
+        //protected override object GetFormattedValue(object value, int rowIndex, ref DataGridViewCellStyle cellStyle, TypeConverter valueTypeConverter, TypeConverter formattedValueTypeConverter, DataGridViewDataErrorContexts context)
+        //{
+        //    if (string.IsNullOrEmpty(value.ToString()))
+        //    {
+        //        return ""
+        //    }
+        //    return FileManager.Load(value.ToString())
+        //}
         protected override void Paint(Graphics graphics, Rectangle clipBounds, Rectangle cellBounds, int rowIndex, DataGridViewElementStates elementState, object value, object formattedValue, string errorText, DataGridViewCellStyle cellStyle, DataGridViewAdvancedBorderStyle advancedBorderStyle, DataGridViewPaintParts paintParts)
         {
-            var viewValue = value.ToString().Substring(0, Math.Min(value.ToString().Length, 10)) + "...";
-            base.Paint(graphics, clipBounds, cellBounds, rowIndex, elementState, value, viewValue, errorText, cellStyle, advancedBorderStyle, paintParts);
+            //  var viewValue = value.ToString().Substring(0, Math.Min(value.ToString().Length, 10)) + "...";
+            var xmlDoc = new XmlDocument();
+            xmlDoc.LoadXml(" <子单元格编辑>" + value + "</子单元格编辑>");
+            var str = "";
+            foreach (XmlNode node in xmlDoc.FirstChild.ChildNodes)
+            {
+                foreach (XmlNode subNode in node.ChildNodes)
+                {
+                    str += subNode.InnerText + " ";
+                }
+                str += "   ";
+            }
+            base.Paint(graphics, clipBounds, cellBounds, rowIndex, elementState, value, str, errorText, cellStyle, advancedBorderStyle, paintParts);
         }
     }
     public class DropDownCell: DataGridViewComboBoxCell
