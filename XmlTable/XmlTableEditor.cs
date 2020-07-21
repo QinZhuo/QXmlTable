@@ -140,28 +140,28 @@ namespace XmlTable
             }
             return type;
         }
-        public Type GetType(XmlNode node,string col)
-        {
-            int a=0;
-            var nodeList= node.SelectNodes("//" + col);
-            foreach (XmlNode valueNode in nodeList )
-            {
-                var value= valueNode.InnerXml;
-                if(string.IsNullOrWhiteSpace(value.ToString()))
-                {
-                    return typeof(string);
-                }
-                else
-                {
-                    if(!int.TryParse(value,out a))
-                    {
-                        return typeof(string);
-                    }
-                }
+        //public Type GetType(XmlNode node,string col)
+        //{
+        //    int a=0;
+        //    var nodeList= node.SelectNodes("//" + col);
+        //    foreach (XmlNode valueNode in nodeList )
+        //    {
+        //        var value= valueNode.InnerXml;
+        //        if(string.IsNullOrWhiteSpace(value.ToString()))
+        //        {
+        //            return typeof(string);
+        //        }
+        //        else
+        //        {
+        //            if(!int.TryParse(value,out a))
+        //            {
+        //                return typeof(string);
+        //            }
+        //        }
 
-            }
-            return typeof(float);
-        }
+        //    }
+        //    return typeof(string);
+        //}
         private void ParseXml(InnerData innerData)
         {
             var root = innerData.xml.LastChild;
@@ -190,7 +190,7 @@ namespace XmlTable
                         }
                             if (!innerData.data.Columns.Contains(cell.Name))
                             {
-                                var col= innerData.data.Columns.Add(cell.Name,GetType(cell,cell.Name));
+                                var col= innerData.data.Columns.Add(cell.Name);
                  
                         }
                             innerData.data.Rows[x][cell.Name] = cell.InnerXml;
@@ -500,7 +500,8 @@ namespace XmlTable
                 {
                     if (tableView.Columns[cell.ColumnIndex].Name != DataTableExtend.IndexCol)
                     {
-                        cell.ChangeValue("");
+                       cell.ChangeValue("");
+                    
                     }
                 }
             }
