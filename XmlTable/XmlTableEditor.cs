@@ -509,11 +509,8 @@ namespace XmlTable
 
         private void AddColumnToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (tableView.SelectedColumns.Count > 0)
-            {
-                var name = new ColumnName();
-                name.Show();
-            }
+            var name = new ColumnName();
+            name.Show();
         }
 
         private void deleteColumntoolStripMenuItem_Click(object sender, EventArgs e)
