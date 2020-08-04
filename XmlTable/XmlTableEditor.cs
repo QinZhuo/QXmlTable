@@ -475,8 +475,8 @@ namespace XmlTable
         {
             if (!isEditMode)
             {
-
-                Clipboard.SetText(CopyData.Copy(tableView.SelectedCells));
+              
+                Clipboard.SetText(CellTable.Copy(tableView.SelectedCells));
                 statusLabel.Text = "复制成功";
             }
            
@@ -486,8 +486,7 @@ namespace XmlTable
         {
             if (!isEditMode)
             {
-                CopyData.Pause(Clipboard.GetText(), tableView);
-               
+                CellTable.Pause(Clipboard.GetText(), tableView);
                 statusLabel.Text = "粘贴成功";
             }
         }
@@ -560,11 +559,26 @@ namespace XmlTable
             }
             e.Handled = true;
         }
-
+        DataGridViewColumn lastSortCol;
         private void tableView_Sorted(object sender, EventArgs e)
         {
             CheckReadOnly();
-           // MessageBox.Show("tableView_Sorted");
+           
+            var col = tableView.SortedColumn;
+            if (col == lastSortCol)
+            {
+                lastSortCol = null;
+                tableView.Sort(col, ListSortDirection.Descending);
+              
+            }
+            else if(tableView.SortOrder== SortOrder.Ascending)
+            {
+                lastSortCol = col;
+            }
+            col.SortMode = DataGridViewColumnSortMode.NotSortable;
+            col.SortMode = DataGridViewColumnSortMode.Automatic;
+
+            // MessageBox.Show("tableView_Sorted");
         }
 
         private void tableView_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
@@ -756,85 +770,120 @@ namespace XmlTable
             this.value = value;
         }
     }
-    [System.Serializable]
-    public class CopyData
+    public class CellTable:List<List<DataGridViewCell>>
     {
-        public string this[int row,int col]
+      
+        public CellTable(DataGridViewSelectedCellCollection cells)
         {
-            get
+        
+            foreach (DataGridViewCell cell in cells)
             {
-                foreach (var cell in cellList)
-                {
-                    if (cell.row == row&&cell.col==col)
-                    {
-                        return cell.value;
-                    }
-                }
-                return "";
+                AddCell(cell);
             }
-        }
-        public List<CellData> cellList;
-        public CopyData()
-        {
-
-        }
-        public CopyData(DataGridViewSelectedCellCollection cells)
-        {
-            cellList = new List<CellData>();
-            if (cells.Count == 0)
-            {
-                return;
-            }
-            DataGridViewCell firstCell = cells[cells.Count-1];
-            for (int i = cells.Count - 1; i >= 0; i--)
-            {
-                var cell = cells[i];
-                var cellData = new CellData(cell.RowIndex-firstCell.RowIndex,cell.ColumnIndex-firstCell.ColumnIndex,cell.Value.ToString());
-                cellList.Add(cellData);
-            }
+            Sort();
         }
         public static string Copy(DataGridViewSelectedCellCollection cells)
         {
-            return FileManager.Serialize(new CopyData(cells));
+            return new CellTable(cells).GetString();
         }
-    
-        public static void Pause(string copyData,DataGridView tableView)
+
+        public string GetString()
         {
-            CopyData data = null;
-            var cells = tableView.SelectedCells;
-            try
+            var value="";
+            foreach (var list in this)
             {
-                data = FileManager.Deserialize<CopyData>(copyData);
+                foreach (var cell in list)
+                {
+                    if (cell.OwningColumn.Name.Equals(DataTableExtend.IndexCol)) continue;
+                    value += cell.Value+""+ '\t';
+                }
+                value += '\n';
             }
-            catch (Exception)
+            return value;
+        }
+        public static void Pause(string copyData, DataGridView tableView)
+        {
+            
+            var cells = tableView.SelectedCells;
+            var table =new List<List<string>>();
+            foreach (var listValue in copyData.Split('\n'))
             {
-                cells[0].ChangeValue(copyData);
-                return;
+                var newLine = new List<string>();
+                table.Add(newLine);
+                foreach (var cellValue in listValue.Split('\t'))
+                {
+                    newLine.Add(cellValue);
+                    
+                }
             }
             
-            List<DataGridViewCell> ignoreList = new List<DataGridViewCell>();
-            for (int i = cells.Count-1; i >=0 ; i--)
+            var selectTable =new CellTable(tableView.SelectedCells);
+            if (selectTable.Count > 0&& selectTable[0].Count>0)
             {
-                var cell = cells[i];
-                if (cell.ReadOnly) continue;
-                if (ignoreList.Contains(cell)) continue;
-
-                foreach (var cellData in data.cellList)
+                MessageBox.Show("粘贴"+selectTable.Count+"," + selectTable[0].Count);
+                var fristCell=selectTable[0][0];
+                for (int x = 0; x < table.Count; x++)
                 {
-                    //tableView[cell.RowIndex + cellData.row, cell.ColumnIndex + cellData.col];
-                  
-                        DataGridViewCell offsetCell = tableView[cell.ColumnIndex + cellData.col, cell.RowIndex + cellData.row];
-                        offsetCell.ChangeValue(cellData.value);
-                        ignoreList.Add(offsetCell);
-                    
-                  
+                    for (int y = 0; y < table[x].Count; y++)
+                    {
+                        var cell = selectTable[x, y];
+                        if (cell != null&& !cell.ReadOnly)
+                        {
+                            selectTable[x, y].ChangeValue( table[x][y]);
+                        }
+                       
+                    }
                 }
 
-               
             }
+
+          
+        }
+        public void AddCell(DataGridViewCell cell)
+        {
+            List<DataGridViewCell> addList=null;
+            foreach (var list in this)
+            {
+                if (list.Count > 0)
+                {
+                    if (list[0].RowIndex == cell.RowIndex)
+                    {
+                        addList = list;
+                    }
+                }
+            }
+            if (addList == null)
+            {
+                addList= new List<DataGridViewCell>();
+                Add(addList);
+            }
+            addList.Add(cell);
+        }
+        public  DataGridViewCell this[int row,int col]
+        {
+            get
+            {
+                if (row < Count)
+                {
+                    if (col < base[row].Count)
+                    {
+                        return base[row][col];
+                    }
+                }
+                return null;
+            }
+        }
+        public new void Sort()
+        {
            
+            foreach (var list in this)
+            {
+                list.Sort((a, b) => a.ColumnIndex - b.ColumnIndex);
+            }
+            this.Sort((a, b) => a[0].RowIndex - b[0].RowIndex);
         }
     }
+   
     public class InnerData
     {
         public int col;
