@@ -58,7 +58,6 @@
             // 
             // tableView
             // 
-            this.tableView.AllowUserToOrderColumns = true;
             this.tableView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
@@ -77,6 +76,8 @@
             this.tableView.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.tableView_CellEndEdit);
             this.tableView.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.tableView_CellMouseDoubleClick);
             this.tableView.CellMouseDown += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.tableView_CellMouseDown);
+            this.tableView.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.tableView_ColumnHeaderMouseClick);
+            this.tableView.ColumnSortModeChanged += new System.Windows.Forms.DataGridViewColumnEventHandler(this.tableView_ColumnSortModeChanged);
             this.tableView.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.tableView_DataError);
             this.tableView.RowPostPaint += new System.Windows.Forms.DataGridViewRowPostPaintEventHandler(this.tableView_RowPostPaint);
             this.tableView.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.tableView_RowsAdded);

@@ -559,27 +559,7 @@ namespace XmlTable
             }
             e.Handled = true;
         }
-        DataGridViewColumn lastSortCol;
-        private void tableView_Sorted(object sender, EventArgs e)
-        {
-            CheckReadOnly();
-           
-            var col = tableView.SortedColumn;
-            if (col == lastSortCol)
-            {
-                lastSortCol = null;
-                tableView.Sort(col, ListSortDirection.Descending);
-              
-            }
-            else if(tableView.SortOrder== SortOrder.Ascending)
-            {
-                lastSortCol = col;
-            }
-            col.SortMode = DataGridViewColumnSortMode.NotSortable;
-            col.SortMode = DataGridViewColumnSortMode.Automatic;
-
-            // MessageBox.Show("tableView_Sorted");
-        }
+      
 
         private void tableView_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
@@ -711,6 +691,41 @@ namespace XmlTable
         {
          
         }
+
+        private void tableView_ColumnSortModeChanged(object sender, DataGridViewColumnEventArgs e)
+        {
+            var col= e.Column;
+            //MessageBox.Show(col.SortMode.ToString());
+        }
+
+        private void tableView_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            var tLast = lastSortCol;
+            lastSortCol = tableView.Columns[e.ColumnIndex];
+            tableView.Sort(tableView.Columns[e.ColumnIndex],  tableView.Columns[e.ColumnIndex]== tLast ? ListSortDirection.Descending : ListSortDirection.Ascending);
+           
+        }
+        DataGridViewColumn lastSortCol=null;
+        public void UpdateIndex()
+        {
+            foreach (DataGridViewRow row in gridView.Rows)
+            {
+                row.Cells[DataTableExtend.IndexCol].Value = row.Cells[DataTableExtend.IndexCol].RowIndex;
+            }
+        }
+        private void tableView_Sorted(object sender, EventArgs e)
+        {
+         
+            if (tableView.SortedColumn.Name == DataTableExtend.IndexCol) return;
+            UpdateIndex();
+            CheckReadOnly();
+
+            if (tableView.SortOrder== SortOrder.Descending)
+            {
+                lastSortCol = null;
+            }
+            tableView.Sort(tableView.Columns[DataTableExtend.IndexCol], ListSortDirection.Ascending);
+        }
     }
 
     public enum GridType
@@ -794,7 +809,6 @@ namespace XmlTable
             {
                 foreach (var cell in list)
                 {
-                    if (cell.OwningColumn.Name.Equals(DataTableExtend.IndexCol)) continue;
                     value += cell.Value+""+ '\t';
                 }
                 value += '\n';
@@ -820,7 +834,7 @@ namespace XmlTable
             var selectTable =new CellTable(tableView.SelectedCells);
             if (selectTable.Count > 0&& selectTable[0].Count>0)
             {
-                MessageBox.Show("粘贴"+selectTable.Count+"," + selectTable[0].Count);
+            
                 var fristCell=selectTable[0][0];
                 for (int x = 0; x < table.Count; x++)
                 {
