@@ -32,13 +32,25 @@ namespace XmlTable
             }
           
         }
+        public static string GetXmlInnerString(this string value)
+        {
+            var xmlDoc = new XmlDocument();
+            xmlDoc.LoadXml(" <子单元格编辑>" + value + "</子单元格编辑>");
+            var str = "";
+            foreach (XmlNode node in xmlDoc.FirstChild.ChildNodes)
+            {
+                str += node.InnerXml+"\n";
+            }
+            return str;
+        }
     }
     public enum ViewType
     {
         文字,
         下拉框,
         按钮,
-        表索引
+        表索引,
+        脚本,
     }
     public class ColInfo
     {
@@ -111,6 +123,8 @@ namespace XmlTable
                     values.AddRange(typeValues);
                     break;
                 case ViewType.按钮:
+                    break;
+                case ViewType.脚本:
                     break;
                 case ViewType.表索引:
                  
@@ -185,7 +199,7 @@ namespace XmlTable
     }
     public class InnerXmlCell: DataGridViewButtonCell
     {
-   
+        
         //protected override object GetFormattedValue(object value, int rowIndex, ref DataGridViewCellStyle cellStyle, TypeConverter valueTypeConverter, TypeConverter formattedValueTypeConverter, DataGridViewDataErrorContexts context)
         //{
         //    if (string.IsNullOrEmpty(value.ToString()))
@@ -210,6 +224,9 @@ namespace XmlTable
             }
             base.Paint(graphics, clipBounds, cellBounds, rowIndex, elementState, value, str, errorText, cellStyle, advancedBorderStyle, paintParts);
         }
+    }
+    public class ScriptCell: InnerXmlCell
+    {
     }
     public class DropDownCell: DataGridViewComboBoxCell
     {

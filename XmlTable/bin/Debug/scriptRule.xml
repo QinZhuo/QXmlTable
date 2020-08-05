@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-16"?>
+<脚本规则 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <关键字>true</关键字>
+  <关键字>false</关键字>
+  <关键字>new</关键字>
+  <关键字>var</关键字>
+  <关键字>this</关键字>
+  <关键字>function</关键字>
+  <关键字>return</关键字>
+  <关键字>if</关键字>
+  <关键字>else</关键字>
+  <关键字>while</关键字>
+  <关键字>switch</关键字>
+  <关键字>for</关键字>
+  <关键字>case</关键字>
+  <关键字>default</关键字>
+  <关键字>break</关键字>
+  <关键字>continue</关键字>
+  <关键字>null</关键字>
+  <字符替换>（</字符替换>
+  <字符替换>(</字符替换>
+  <字符替换>）</字符替换>
+  <字符替换>)</字符替换>
+  <字符替换>》</字符替换>
+  <字符替换>&gt;</字符替换>
+</脚本规则>

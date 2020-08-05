@@ -288,11 +288,16 @@ namespace XmlTable
 
                         break;
                     case ViewType.按钮:
-
                         if (!(tableView[i, j] is InnerXmlCell))
                         {
 
                             tableView[i, j] = new InnerXmlCell();
+                        }
+                        break;
+                    case ViewType.脚本:
+                        if(!(tableView[i, j] is ScriptCell))
+                        {
+                            tableView[i, j] = new ScriptCell();
                         }
                         break;
                     default:
@@ -429,7 +434,6 @@ namespace XmlTable
             }
            
         }
-
         private void tableView_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
         {
          
@@ -443,19 +447,51 @@ namespace XmlTable
            
             var cell = tableView[e.ColumnIndex, e.RowIndex];
             //    var rect = cell.ContentBounds;
-          
+            var info = tableInfo[cell.OwningColumn.Name];
             if (cell.ReadOnly)
             {
-                ParseInnerXml(cell.ColumnIndex ,tableView.GetRowIndex(e.RowIndex),cell.Value.ToString());
+              
+                if (info.type == ViewType.脚本)
+                {
+                    FileManager.Save( "tempValue.txt", cell.Value.ToString().GetXmlInnerString());
+                    var process = Process.Start(info.typeValues[0], "tempValue.txt");
+                    // SetForegroundWindow(FindWindow(null, process.MainWindowTitle));
+                    //  process.WaitForInputIdle();
+                    process.WaitForExit();
+                    ParseInnerXml(cell.ColumnIndex, tableView.GetRowIndex(e.RowIndex), cell.Value.ToString());
+                    foreach (DataGridViewRow row in gridView.Rows)
+                    {
+                        foreach (DataGridViewCell c in row.Cells)
+                        {
+                            if (!c.ReadOnly)
+                            {
+                                c.Value = "";
+                                c.Selected = true;
+                            }
+                        }
+                    }
+                    //process.WaitForInputIdle();
+                    //process.WaitForExit();
+                    CellTable.Pause(Clipboard.GetText(), tableView);
+                    statusLabel.Text = "脚本编辑成功";
+                }
+                else
+                {
+                    ParseInnerXml(cell.ColumnIndex, tableView.GetRowIndex(e.RowIndex), cell.Value.ToString());
+                }
+              
+                
+              //  gridView.Rows[0].Cells[0].Selected = true;
+                
             }
-            var info = tableInfo[cell.OwningColumn.Name];
+    
             if (info != null&& cell.Value!=null&&!string.IsNullOrEmpty(cell.Value.ToString()))
             {
                 if(info.type== ViewType.表索引)
                 {
                     var process= Process.Start(Process.GetCurrentProcess().MainModule.FileName, info.TablePath+" "+cell.Value);
                     SetForegroundWindow(FindWindow( null,process.MainWindowTitle));
-                    
+
                 }
             }
         }
@@ -490,6 +526,7 @@ namespace XmlTable
                 statusLabel.Text = "粘贴成功";
             }
         }
+        
 
         private void deleteRowToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -717,14 +754,16 @@ namespace XmlTable
         {
          
             if (tableView.SortedColumn.Name == DataTableExtend.IndexCol) return;
+
             UpdateIndex();
-            CheckReadOnly();
 
             if (tableView.SortOrder== SortOrder.Descending)
             {
                 lastSortCol = null;
             }
             tableView.Sort(tableView.Columns[DataTableExtend.IndexCol], ListSortDirection.Ascending);
+        
+            CheckReadOnly();
         }
     }
 
