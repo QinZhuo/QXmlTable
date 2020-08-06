@@ -1,3 +1,0 @@
-数值开始
-var value= 自己.Buff[测试Buff].BuffCount*100;
-数值结束
