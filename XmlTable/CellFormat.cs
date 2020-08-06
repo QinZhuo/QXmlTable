@@ -13,6 +13,7 @@ namespace XmlTable
 {
     public static class ExtendsMnager
     {
+
         public static void ChangeValue(this DataGridViewCell cell, string newValue)
         {
             var tableView=cell.DataGridView;
@@ -31,6 +32,24 @@ namespace XmlTable
                 XmlTableEditor.mainTable.CheckViewType(cell.ColumnIndex, cell.RowIndex);
             }
           
+        }
+        public static string FixXmlValue(this string value)
+        {
+            value = value.Replace("&", "&amp;");
+            value = value.Replace("<", "&lt;");
+            value = value.Replace(">", "&gt;");
+            value = value.Replace("'", "&apos;");
+            value = value.Replace("\"", "&quot;");
+            return value;
+        }
+        public static string FixViewValue(this string value)
+        {
+            value = value.Replace("&lt;","<");
+            value = value.Replace("&gt;",">");
+            value = value.Replace("&apos;","'" );
+            value = value.Replace("&quot;","\"");
+            value = value.Replace("&amp;", "&");
+            return value;
         }
         public static string GetXmlInnerString(this string value)
         {
@@ -195,7 +214,14 @@ namespace XmlTable
     }
     public class TextCell : DataGridViewTextBoxCell
     {
-
+        public override object ParseFormattedValue(object formattedValue, DataGridViewCellStyle cellStyle, TypeConverter formattedValueTypeConverter, TypeConverter valueTypeConverter)
+        {
+            return formattedValue.ToString().FixXmlValue();
+        }
+        protected override object GetFormattedValue(object value, int rowIndex, ref DataGridViewCellStyle cellStyle, TypeConverter valueTypeConverter, TypeConverter formattedValueTypeConverter, DataGridViewDataErrorContexts context)
+        {
+            return value.ToString().FixViewValue();
+        }
     }
     public class InnerXmlCell: DataGridViewButtonCell
     {
