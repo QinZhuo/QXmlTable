@@ -987,7 +987,10 @@ namespace XmlTable
                     for (int col = 0; col < data.Columns.Count; col++)
                     {
                         var cell = data.GetRow(XmlTableEditor.mainTable.gridView.GetRowIndex(row))[col].ToString();
-                      
+                        if (!cell.IsXml())
+                        {
+                            cell = cell.FixXmlValue();
+                        }
                         var name = data.Columns[col].ColumnName;
                         if (name == DataTableExtend.IndexCol)
                         {
@@ -1022,17 +1025,13 @@ namespace XmlTable
                     }
                     if (gridType == GridType.row)
                     {
-                        var text = data.Rows[row][0].ToString();
-                        try
+                        var cell = data.Rows[row][0].ToString();
+                        if (!cell.IsXml())
                         {
-                            rowNode.InnerXml = text;
-
+                            cell = cell.FixXmlValue();
                         }
-                        catch (Exception)
-                        {
-                            MessageBox.Show(XmlTableEditor.mainTable.gridView.Rows[row].Cells[0].GetType().ToString());
-                            throw;
-                        }
+                        rowNode.InnerXml = cell;
+                      
                       
                     }
                     else if (gridType == GridType.col)
@@ -1041,6 +1040,10 @@ namespace XmlTable
                         for (int col = 0; col < data.Columns.Count; col++)
                         {
                             var cell = data.GetRow(XmlTableEditor.mainTable.gridView.GetRowIndex(row))[col].ToString();
+                            if (!cell.IsXml())
+                            {
+                                cell = cell.FixXmlValue();
+                            }
                             if (string.IsNullOrEmpty(cell))
                             {
                                 continue;

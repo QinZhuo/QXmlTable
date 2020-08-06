@@ -13,7 +13,10 @@ namespace XmlTable
 {
     public static class ExtendsMnager
     {
-
+        public static bool IsXml(this string str)
+        {
+            return str.Contains("<") && str.Contains("</") && str.Contains(">");
+        }
         public static void ChangeValue(this DataGridViewCell cell, string newValue)
         {
             var tableView=cell.DataGridView;
@@ -212,12 +215,20 @@ namespace XmlTable
     }
     public class TextCell : DataGridViewTextBoxCell
     {
-       
+        //public override object ParseFormattedValue(object formattedValue, DataGridViewCellStyle cellStyle, TypeConverter formattedValueTypeConverter, TypeConverter valueTypeConverter)
+        //{
+        //    return formattedValue.ToString().FixXmlValue();
+        //}
         protected override object GetFormattedValue(object value, int rowIndex, ref DataGridViewCellStyle cellStyle, TypeConverter valueTypeConverter, TypeConverter formattedValueTypeConverter, DataGridViewDataErrorContexts context)
         {
-            return value.ToString().FixXmlValue();
+            return value.ToString().FixViewValue();
         }
-       
+        //protected override void Paint(Graphics graphics, Rectangle clipBounds, Rectangle cellBounds, int rowIndex, DataGridViewElementStates elementState, object value, object formattedValue, string errorText, DataGridViewCellStyle cellStyle, DataGridViewAdvancedBorderStyle advancedBorderStyle, DataGridViewPaintParts paintParts)
+        //{
+
+        //    base.Paint(graphics, clipBounds, cellBounds, rowIndex, elementState, value.ToString().FixXmlValue(), formattedValue, errorText, cellStyle, advancedBorderStyle, paintParts);
+        //}
+
     }
     public class InnerXmlCell: DataGridViewButtonCell
     {
