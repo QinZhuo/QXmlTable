@@ -100,7 +100,7 @@ namespace XmlTable
         }
         public static bool IsXml(string str)
         {
-            return str.Contains("<") && str.Contains(">");
+            return str.Contains("<") && str.Contains("</")&& str.Contains(">");
         }
         public GridType GetGridType(XmlNode xml)
         {
@@ -134,7 +134,7 @@ namespace XmlTable
                 }
                 else
                 {
-                    type = GridType.none;
+                    type = GridType.col;
                 }
 
             }
@@ -584,8 +584,6 @@ namespace XmlTable
 
         private void tableView_SortCompare(object sender, DataGridViewSortCompareEventArgs e)
         {
-
-            MessageBox.Show("排序");
             if (e.CellValue1 is int&&e.CellValue2 is int)
             {
                 statusLabel.Text = "【"+e.Column.Name +"】列按数值排序";
@@ -970,7 +968,6 @@ namespace XmlTable
         public XmlNode UpdateChange()
         {
             var root = xml.LastChild;
-
             List<XmlNode> removeList = new List<XmlNode>();
             for (int row = 0; row < data.Rows.Count; row++)
             {
@@ -985,7 +982,7 @@ namespace XmlTable
                     }
                 }
 
-                if (XmlTableEditor.IsXml(root.FirstChild.InnerXml))
+                if (gridType == GridType.Grid)
                 {
                     for (int col = 0; col < data.Columns.Count; col++)
                     {
@@ -1017,18 +1014,30 @@ namespace XmlTable
                 }
                 else
                 {
-                  //  MessageBox.Show(gridType.ToString());
+                    //  MessageBox.Show(gridType.ToString());
 
-                    if(gridType == GridType.row&&data.Columns.Count>2)
+                    if (gridType == GridType.row && data.Columns.Count > 2)
                     {
                         gridType = GridType.col;
                     }
                     if (gridType == GridType.row)
                     {
-                        rowNode.InnerXml = data.Rows[row][0].ToString();
+                        var text = data.Rows[row][0].ToString();
+                        try
+                        {
+                            rowNode.InnerXml = text;
+
+                        }
+                        catch (Exception)
+                        {
+                            MessageBox.Show(XmlTableEditor.mainTable.gridView.Rows[row].Cells[0].GetType().ToString());
+                            throw;
+                        }
+                      
                     }
                     else if (gridType == GridType.col)
                     {
+                    
                         for (int col = 0; col < data.Columns.Count; col++)
                         {
                             var cell = data.GetRow(XmlTableEditor.mainTable.gridView.GetRowIndex(row))[col].ToString();
@@ -1055,9 +1064,10 @@ namespace XmlTable
                             }
                         }
                     }
-                   // var info = data.Rows[row][0].ToString();
-                   
+                    // var info = data.Rows[row][0].ToString();
+                 
                 }
+          
                 if (string.IsNullOrWhiteSpace(rowNode.InnerText))
                 {
                     removeList.Add(rowNode);
