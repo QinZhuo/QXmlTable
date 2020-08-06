@@ -140,28 +140,7 @@ namespace XmlTable
             }
             return type;
         }
-        //public Type GetType(XmlNode node,string col)
-        //{
-        //    int a=0;
-        //    var nodeList= node.SelectNodes("//" + col);
-        //    foreach (XmlNode valueNode in nodeList )
-        //    {
-        //        var value= valueNode.InnerXml;
-        //        if(string.IsNullOrWhiteSpace(value.ToString()))
-        //        {
-        //            return typeof(string);
-        //        }
-        //        else
-        //        {
-        //            if(!int.TryParse(value,out a))
-        //            {
-        //                return typeof(string);
-        //            }
-        //        }
-
-        //    }
-        //    return typeof(string);
-        //}
+     
         private void ParseXml(InnerData innerData)
         {
             var root = innerData.xml.LastChild;
@@ -251,6 +230,7 @@ namespace XmlTable
             {
                 return false;
             }
+
           
             if (colInfo != null&&!string.IsNullOrWhiteSpace( tableView[i, j].Value.ToString()))
             {
@@ -312,13 +292,12 @@ namespace XmlTable
                 }
             }
             var flag = false;
-            if (i != 0)
+            if (tableView.Columns[i].Name !=DataTableExtend.IndexCol)
             {
                 flag = IsXml(tableView.Rows[j].Cells[i].Value.ToString());
-             
                 if (flag)
                 {
-                   
+                  
                     tableView[i, j] = new InnerXmlCell();
                 }
                 tableView[i, j].ReadOnly = flag;
@@ -341,7 +320,7 @@ namespace XmlTable
                     tableView.Columns[i].Width = 50;
                 }
                 var colInfo = tableInfo[curData.Path+tableView.Columns[i].Name];
-              
+            
                 for (int j = 0; j < tableView.RowCount; j++)
                 {
         
