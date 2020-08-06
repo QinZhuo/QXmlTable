@@ -73,7 +73,7 @@ namespace XmlTable
 
 
         }
-
+       
         private void tableView_DataSourceChanged(object sender, EventArgs e)
         {
         }
@@ -434,6 +434,21 @@ namespace XmlTable
             }
            
         }
+        public static string AppPath
+        {
+            get
+            {
+                var path = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+                return path.Substring(0, path.LastIndexOf('\\'));
+            }
+        }
+        public static string TempPath
+        {
+            get
+            {
+                return AppPath + '\\' + "scirptTemp.txt";
+            }
+        }
         private void tableView_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
         {
          
@@ -451,28 +466,37 @@ namespace XmlTable
             if (cell.ReadOnly)
             {
               
-                if (info.type == ViewType.脚本)
+                if (info!=null&&info.type == ViewType.脚本)
                 {
-                    FileManager.Save( "tempValue.txt", cell.Value.ToString().GetXmlInnerString());
-                    var process = Process.Start(info.typeValues[0], "tempValue.txt");
-                    // SetForegroundWindow(FindWindow(null, process.MainWindowTitle));
-                    //  process.WaitForInputIdle();
+                    FileManager.Save(TempPath,cell.Value.ToString().GetXmlInnerString());
+                    var process = Process.Start(AppPath+"\\"+ info.typeValues[0], TempPath);
                     process.WaitForExit();
                     ParseInnerXml(cell.ColumnIndex, tableView.GetRowIndex(e.RowIndex), cell.Value.ToString());
+                    var text = Clipboard.GetText();
+                    var count = 1;
+                    foreach (var c in text)
+                    {
+                        if (c.Equals('\n'))
+                        {
+                            count++;
+                        }
+                    }
+                    while (curData.data.Rows.Count<= count)
+                    {
+                        curData.data.Rows.Add();
+                    }
                     foreach (DataGridViewRow row in gridView.Rows)
                     {
                         foreach (DataGridViewCell c in row.Cells)
                         {
-                            if (!c.ReadOnly)
+                            if (!c.ReadOnly&&c.RowIndex!=gridView.Rows.Count-1)
                             {
                                 c.Value = "";
                                 c.Selected = true;
                             }
                         }
                     }
-                    //process.WaitForInputIdle();
-                    //process.WaitForExit();
-                    CellTable.Pause(Clipboard.GetText(), tableView);
+                    CellTable.Pause(text, tableView);
                     statusLabel.Text = "脚本编辑成功";
                 }
                 else

@@ -23,5 +23,10 @@ namespace XmlTable
              XmlTableEditor.mainTable.FindAndSelect(findInput.Text);
           
         }
+
+        private void Finder_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

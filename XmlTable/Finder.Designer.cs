@@ -63,6 +63,7 @@
             this.ShowIcon = false;
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "Finder";
+            this.Load += new System.EventHandler(this.Finder_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
