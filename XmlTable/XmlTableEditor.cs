@@ -475,7 +475,7 @@ namespace XmlTable
                             }
                         }
                     }
-                    CellTable.Pause(text, tableView);
+                    CellTable.ScriptPause(text, tableView);
                     statusLabel.Text = "脚本编辑成功";
                 }
                 else
@@ -855,6 +855,43 @@ namespace XmlTable
             }
             return value;
         }
+        public static void ScriptPause(string copyData, DataGridView tableView)
+        {
+
+            var cells = tableView.SelectedCells;
+            var table = new List<List<string>>();
+            foreach (var listValue in copyData.Split('\n'))
+            {
+                var newLine = new List<string>();
+                table.Add(newLine);
+                foreach (var cellValue in listValue.Split('\t'))
+                {
+                    newLine.Add(cellValue);
+
+                }
+            }
+
+            var selectTable = new CellTable(tableView.SelectedCells);
+            if (selectTable.Count > 0 && selectTable[0].Count > 0)
+            {
+                for (int x = 0; x < table.Count; x++)
+                {
+                    for (int y = 0; y < table[x].Count; y++)
+                    {
+                        var cell = selectTable[x, y];
+                        if (cell != null && cell.OwningColumn.Name != DataTableExtend.IndexCol)
+                        {
+                            selectTable[x, y].ChangeValue(table[x][y]);
+                        }
+
+                    }
+                }
+
+            }
+
+
+        }
+
         public static void Pause(string copyData, DataGridView tableView)
         {
             
