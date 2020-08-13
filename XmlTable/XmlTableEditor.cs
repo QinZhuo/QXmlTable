@@ -869,25 +869,50 @@ namespace XmlTable
                     newLine.Add(cellValue);
                     
                 }
+                newLine.RemoveAt(newLine.Count - 1);
             }
-            
+            table.RemoveAt(table.Count - 1);
+
             var selectTable =new CellTable(tableView.SelectedCells);
             if (selectTable.Count > 0&& selectTable[0].Count>0)
             {
-            
-                var fristCell=selectTable[0][0];
-                for (int x = 0; x < table.Count; x++)
+
+               var fristCell=selectTable[0][0];
+
+                foreach (var row in selectTable)
                 {
-                    for (int y = 0; y < table[x].Count; y++)
+                    foreach (var cell in row)
                     {
-                        var cell = selectTable[x, y];
-                        if (cell != null&& !cell.ReadOnly)
+                        var x = cell.RowIndex - fristCell.RowIndex; 
+                        var y = cell.ColumnIndex - fristCell.ColumnIndex;
+                        while (x >= table.Count)
                         {
-                            selectTable[x, y].ChangeValue( table[x][y]);
+                            x -= table.Count;
                         }
-                       
+                        while (y>=table[x].Count)
+                        {
+                            y -= table[x].Count;
+                        }
+                        if (cell != null && cell.OwningColumn.Name != DataTableExtend.IndexCol)
+                        {
+                            cell.ChangeValue(table[x][y]);
+                        }
+                   
                     }
                 }
+
+                //for (int x = 0; x < table.Count; x++)
+                //{
+                //    for (int y = 0; y < table[x].Count; y++)
+                //    {
+                //        var cell = selectTable[x, y];
+                //        if (cell != null&& cell.OwningColumn.Name!= DataTableExtend.IndexCol)
+                //        {
+                //            selectTable[x, y].ChangeValue( table[x][y]);
+                //        }
+                       
+                //    }
+                //}
 
             }
 
@@ -917,6 +942,7 @@ namespace XmlTable
         {
             get
             {
+             
                 if (row < Count)
                 {
                     if (col < base[row].Count)
