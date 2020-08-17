@@ -71,7 +71,7 @@ namespace XmlTable
             gridView.RowsDefaultCellStyle.BackColor = Color.WhiteSmoke;
             gridView.AlternatingRowsDefaultCellStyle.BackColor = Color.White;
 
-
+            
         }
        
         private void tableView_DataSourceChanged(object sender, EventArgs e)
@@ -903,29 +903,36 @@ namespace XmlTable
                 table.Add(newLine);
                 foreach (var cellValue in listValue.Split('\t'))
                 {
-                    newLine.Add(cellValue);
-                    
+                    if (!string.IsNullOrEmpty(cellValue))
+                    {
+                        newLine.Add(cellValue);
+                    }
                 }
-                newLine.RemoveAt(newLine.Count - 1);
+                if (newLine.Count == 0)
+                {
+                    table.Remove(newLine);
+                }
             }
-            table.RemoveAt(table.Count - 1);
-
+        
             var selectTable =new CellTable(tableView.SelectedCells);
             if (selectTable.Count > 0&& selectTable[0].Count>0)
             {
-
-               var fristCell=selectTable[0][0];
+            
+                var fristCell=selectTable[0][0];
 
                 foreach (var row in selectTable)
                 {
                     foreach (var cell in row)
                     {
+                     
                         var x = cell.RowIndex - fristCell.RowIndex; 
                         var y = cell.ColumnIndex - fristCell.ColumnIndex;
+                     
                         while (x >= table.Count)
                         {
                             x -= table.Count;
                         }
+                 
                         while (y>=table[x].Count)
                         {
                             y -= table[x].Count;
