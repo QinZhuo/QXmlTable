@@ -219,8 +219,14 @@ namespace XmlTable
         //{
         //    return formattedValue.ToString().FixXmlValue();
         //}
+        public TextCell():base()
+        {
+            Style.WrapMode = DataGridViewTriState.True;
+            Style.Tag = true;
+        }
         protected override object GetFormattedValue(object value, int rowIndex, ref DataGridViewCellStyle cellStyle, TypeConverter valueTypeConverter, TypeConverter formattedValueTypeConverter, DataGridViewDataErrorContexts context)
         {
+            
             return value.ToString().FixViewValue();
         }
         //protected override void Paint(Graphics graphics, Rectangle clipBounds, Rectangle cellBounds, int rowIndex, DataGridViewElementStates elementState, object value, object formattedValue, string errorText, DataGridViewCellStyle cellStyle, DataGridViewAdvancedBorderStyle advancedBorderStyle, DataGridViewPaintParts paintParts)

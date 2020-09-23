@@ -163,7 +163,6 @@ namespace XmlTable
                             if (!innerData.data.Columns.Contains(DataTableExtend.IndexCol))
                             {
                                 var col= innerData.data.Columns.Add(DataTableExtend.IndexCol,typeof(int));
-                              
                             }
                             innerData.data.Rows[x][DataTableExtend.IndexCol] = x;
                         }
@@ -173,7 +172,7 @@ namespace XmlTable
                  
                         }
                             innerData.data.Rows[x][cell.Name] = cell.InnerXml;
-                       
+                    
                         y++;
                     }
                     x++;
@@ -341,10 +340,11 @@ namespace XmlTable
         }
         private void ParseRootXml(string xmlstr)
         {
-        
+          
             xmlDoc = new XmlDocument();
             var data = new DataTable();
             xmlDoc.LoadXml(xmlstr);
+           
             Text = xmlDoc.LastChild.Name + " - XmlViewer";
             var innerData = new InnerData(null)
             {
@@ -374,7 +374,6 @@ namespace XmlTable
              
                 tableInfo = FileManager.Deserialize<XmlTableInfo>( FileManager.Load(path + ".tableInfo"));
             }
-          
             ParseRootXml(xmlstr);
         }
         private void openXmlFileDialog_FileOk(object sender, CancelEventArgs e)
@@ -581,7 +580,49 @@ namespace XmlTable
         {
            
         }
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData != Keys.Enter)
+            {
+                //继续原来base.ProcessCmdKey中的处理
+                return base.ProcessCmdKey(ref msg, keyData);
+            }
+            if (!gridView.IsCurrentCellInEditMode)   //如果当前单元格处于编辑模式
+            {
+                //继续原来base.ProcessCmdKey中的处理
+                return base.ProcessCmdKey(ref msg, keyData);
+            }
+            if (gridView.CurrentCell.Style.Tag == null ||
+                !(gridView.CurrentCell.Style.Tag is bool))
+            {
+                return base.ProcessCmdKey(ref msg, keyData);
+            }
+            TextBox textBox = gridView.EditingControl as TextBox;
+            int nStart = textBox.SelectionStart;//得到当前光标的位置
+            string text = textBox.Text;
+            if (nStart < 0 || nStart > text.Length)
+                return false;
+            //光标签名的字
+            string text1 = "";
+            if (nStart > 0)
+            {
+                text1 = text.Substring(0, nStart);
+            }
+            //光标后面的字
+            string text2 = "";
+            if (nStart < text.Length)
+            {
+                text2 = text.Substring(nStart, text.Length - nStart);
+            }
+            text = text1 + "\r\n" + text2;
+            textBox.Text = text;
+            gridView.CurrentCell.Value = text;
+            textBox.Select(nStart + 2, 0);
 
+            return true;
+
+
+        }
         private void tableView_SortCompare(object sender, DataGridViewSortCompareEventArgs e)
         {
             if (e.CellValue1 is int&&e.CellValue2 is int)

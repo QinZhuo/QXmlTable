@@ -47,6 +47,7 @@ namespace XmlTable
             {
                 return data;
             }
+
             using (var file = System.IO.File.Open(path, System.IO.FileMode.Open))
             {
                 using (var sw = new System.IO.StreamReader(file))
@@ -54,7 +55,7 @@ namespace XmlTable
                     while (!sw.EndOfStream)
                     {
 
-                        data += sw.ReadLine();
+                        data += sw.ReadLine()+"\n";
                     }
                 }
             }
