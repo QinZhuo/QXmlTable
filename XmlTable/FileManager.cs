@@ -55,7 +55,7 @@ namespace XmlTable
                     while (!sw.EndOfStream)
                     {
 
-                        data += sw.ReadLine()+"\n";
+                        data += sw.ReadLine()+Environment.NewLine;
                     }
                 }
             }
