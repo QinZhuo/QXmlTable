@@ -363,6 +363,22 @@ namespace XmlTable
             fileChangeTime = System.IO.File.GetLastWriteTimeUtc(xmlPath);
             statusLabel.Text = "文件保存成功【" + xmlPath + "】"+ fileChangeTime;
         }
+        public void GetTableInfo(string path)
+        {
+          
+            if (System.IO.File.Exists(path + ".tableInfo")){
+             
+                tableInfo = FileManager.Deserialize<XmlTableInfo>(FileManager.Load(path + ".tableInfo"));
+                return;
+            }
+            var folderPath = path.Substring(0, path.LastIndexOf('\\'));
+            var tableInfoName= path.Substring(path.LastIndexOf('.') + 1) + ".tableInfo";
+             if (System.IO.File.Exists(folderPath+"/"+tableInfoName))
+            {
+
+                tableInfo = FileManager.Deserialize<XmlTableInfo>(FileManager.Load(folderPath + "/" + tableInfoName));
+            }
+        }
         private void OpenXml(string path)
         {
             xmlPath = path;
@@ -370,10 +386,7 @@ namespace XmlTable
 
             fileChangeTime = System.IO.File.GetLastWriteTimeUtc(path);
             var xmlstr = FileManager.Load(path);
-            if(System.IO.File.Exists(path + ".tableInfo")){
-             
-                tableInfo = FileManager.Deserialize<XmlTableInfo>( FileManager.Load(path + ".tableInfo"));
-            }
+            GetTableInfo(path);
             ParseRootXml(xmlstr);
         }
         private void openXmlFileDialog_FileOk(object sender, CancelEventArgs e)
@@ -582,7 +595,7 @@ namespace XmlTable
         }
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            if (keyData != Keys.Enter)
+            if (!keyData .HasFlag( Keys.Enter)||!keyData.HasFlag(Keys.Alt))
             {
                 //继续原来base.ProcessCmdKey中的处理
                 return base.ProcessCmdKey(ref msg, keyData);
