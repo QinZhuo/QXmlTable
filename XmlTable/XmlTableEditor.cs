@@ -903,24 +903,32 @@ namespace XmlTable
             {
                 foreach (var cell in list)
                 {
-                    value += cell.Value+""+ '\t';
+                    var tValue = cell.Value.ToString().Replace("\"","\"\"");
+                    if (tValue.Contains(Environment.NewLine))
+                    {
+                        tValue = '\"' + tValue + '\"';
+                    }
+                    value += tValue + '\t';
                 }
                 value += '\n';
             }
             return value;
         }
+        
         public static void ScriptPause(string copyData, DataGridView tableView)
         {
 
+            copyData = SubReplace(copyData, Environment.NewLine, "#qnl");
             var cells = tableView.SelectedCells;
             var table = new List<List<string>>();
+            
             foreach (var listValue in copyData.Split('\n'))
             {
                 var newLine = new List<string>();
                 table.Add(newLine);
                 foreach (var cellValue in listValue.Split('\t'))
                 {
-                    newLine.Add(cellValue);
+                    newLine.Add(SubReplace(cellValue,"#qnl",Environment.NewLine));
 
                 }
             }
@@ -945,10 +953,38 @@ namespace XmlTable
 
 
         }
+      
+        public static string SubReplace(string value,string newValue,params string[] oldValue)
+        {
+            var start = value.IndexOf('\"');
+            var end = value.IndexOf('\"', start + 1);
+            while (start >= 0 && end >= 0)
+            {
 
+               
+                    var subStr = value.Substring(start, end - start+1);
+                    var newStr = subStr;
+                    foreach (var oValue in oldValue)
+                    {
+                        newStr = newStr.Replace(oValue, newValue).Trim('\"');
+                    }
+                    MessageBox.Show(subStr + "=>" + newStr);
+                    value = value.Replace(subStr, newStr);
+                    end += newStr.Length - subStr.Length;
+
+                start = value.IndexOf('\"', end+1);
+                end = value.IndexOf('\"', start + 1);
+            }
+            return value;
+        }
         public static void Pause(string copyData, DataGridView tableView)
         {
-            
+
+            //  MessageBox.Show(copyData + "】=>【" + SubReplace(copyData, Environment.NewLine, "#qnl"));
+
+            //copyData = copyData.Replace("\n", Environment.NewLine);
+            copyData = copyData.Replace("\"\"", "#qts");
+            copyData = SubReplace(copyData, "#qnl", Environment.NewLine , "\n");
             var cells = tableView.SelectedCells;
             var table =new List<List<string>>();
             foreach (var listValue in copyData.Split('\n'))
@@ -959,7 +995,7 @@ namespace XmlTable
                 {
                     if (!string.IsNullOrEmpty(cellValue))
                     {
-                        newLine.Add(cellValue);
+                        newLine.Add(cellValue.Replace("#qnl", Environment.NewLine).Replace("#qts", "\""));
                     }
                 }
                 if (newLine.Count == 0)
