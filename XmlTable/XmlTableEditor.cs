@@ -968,7 +968,6 @@ namespace XmlTable
                     {
                         newStr = newStr.Replace(oValue, newValue).Trim('\"');
                     }
-                    MessageBox.Show(subStr + "=>" + newStr);
                     value = value.Replace(subStr, newStr);
                     end += newStr.Length - subStr.Length;
 
