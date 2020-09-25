@@ -914,24 +914,59 @@ namespace XmlTable
             }
             return value;
         }
-        
-        public static void ScriptPause(string copyData, DataGridView tableView)
-        {
 
-            copyData = SubReplace(copyData, Environment.NewLine, "#qnl");
-            var cells = tableView.SelectedCells;
+
+
+        public static string SubReplace(string value, string newValue, params string[] oldValue)
+        {
+            var start = value.IndexOf('\"');
+            var end = value.IndexOf('\"', start + 1);
+            while (start >= 0 && end >= 0)
+            {
+
+
+                var subStr = value.Substring(start, end - start + 1);
+                var newStr = subStr;
+                foreach (var oValue in oldValue)
+                {
+                    newStr = newStr.Replace(oValue, newValue).Trim('\"');
+                }
+                value = value.Replace(subStr, newStr);
+                end += newStr.Length - subStr.Length;
+
+                start = value.IndexOf('\"', end + 1);
+                end = value.IndexOf('\"', start + 1);
+            }
+            return value;
+        }
+        public static List<List<string>> ParseCopyData(string copyData)
+        {
+            copyData = copyData.Replace("\"\"", "#qts");
+            copyData = SubReplace(copyData, "#qnl", Environment.NewLine, "\n");
+          
             var table = new List<List<string>>();
-            
             foreach (var listValue in copyData.Split('\n'))
             {
                 var newLine = new List<string>();
                 table.Add(newLine);
                 foreach (var cellValue in listValue.Split('\t'))
                 {
-                    newLine.Add(SubReplace(cellValue,"#qnl",Environment.NewLine));
-
+                    if (!string.IsNullOrEmpty(cellValue))
+                    {
+                        newLine.Add(cellValue.Replace("#qnl", Environment.NewLine).Replace("#qts", "\""));
+                    }
+                }
+                if (newLine.Count == 0)
+                {
+                    table.Remove(newLine);
                 }
             }
+            return table;
+        }
+        public static void ScriptPause(string copyData, DataGridView tableView)
+        {
+            var table = ParseCopyData(copyData);
+            var cells = tableView.SelectedCells;
 
             var selectTable = new CellTable(tableView.SelectedCells);
             if (selectTable.Count > 0 && selectTable[0].Count > 0)
@@ -953,60 +988,15 @@ namespace XmlTable
 
 
         }
-      
-        public static string SubReplace(string value,string newValue,params string[] oldValue)
-        {
-            var start = value.IndexOf('\"');
-            var end = value.IndexOf('\"', start + 1);
-            while (start >= 0 && end >= 0)
-            {
 
-               
-                    var subStr = value.Substring(start, end - start+1);
-                    var newStr = subStr;
-                    foreach (var oValue in oldValue)
-                    {
-                        newStr = newStr.Replace(oValue, newValue).Trim('\"');
-                    }
-                    value = value.Replace(subStr, newStr);
-                    end += newStr.Length - subStr.Length;
-
-                start = value.IndexOf('\"', end+1);
-                end = value.IndexOf('\"', start + 1);
-            }
-            return value;
-        }
         public static void Pause(string copyData, DataGridView tableView)
         {
 
-            //  MessageBox.Show(copyData + "】=>【" + SubReplace(copyData, Environment.NewLine, "#qnl"));
-
-            //copyData = copyData.Replace("\n", Environment.NewLine);
-            copyData = copyData.Replace("\"\"", "#qts");
-            copyData = SubReplace(copyData, "#qnl", Environment.NewLine , "\n");
+            var table = ParseCopyData(copyData);
             var cells = tableView.SelectedCells;
-            var table =new List<List<string>>();
-            foreach (var listValue in copyData.Split('\n'))
-            {
-                var newLine = new List<string>();
-                table.Add(newLine);
-                foreach (var cellValue in listValue.Split('\t'))
-                {
-                    if (!string.IsNullOrEmpty(cellValue))
-                    {
-                        newLine.Add(cellValue.Replace("#qnl", Environment.NewLine).Replace("#qts", "\""));
-                    }
-                }
-                if (newLine.Count == 0)
-                {
-                    table.Remove(newLine);
-                }
-            }
-        
             var selectTable =new CellTable(tableView.SelectedCells);
             if (selectTable.Count > 0&& selectTable[0].Count>0)
             {
-            
                 var fristCell=selectTable[0][0];
 
                 foreach (var row in selectTable)
@@ -1033,19 +1023,6 @@ namespace XmlTable
                    
                     }
                 }
-
-                //for (int x = 0; x < table.Count; x++)
-                //{
-                //    for (int y = 0; y < table[x].Count; y++)
-                //    {
-                //        var cell = selectTable[x, y];
-                //        if (cell != null&& cell.OwningColumn.Name!= DataTableExtend.IndexCol)
-                //        {
-                //            selectTable[x, y].ChangeValue( table[x][y]);
-                //        }
-                       
-                //    }
-                //}
 
             }
 

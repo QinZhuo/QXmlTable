@@ -162,9 +162,14 @@ namespace XmlTable
                         {
                             var valueNode = node.ParentNode.SelectSingleNode(typeValues[2]);
                             var value = node.InnerText == valueNode.InnerText ? node.InnerText : node.InnerText + " = " + valueNode.InnerText;
-                            values.Add(value);
+                        
                             // node.ParentNode.SelectSingleNode(typeValues[2]).Value
-                            dic.Add(node.InnerText, value);
+                            if (!dic.ContainsKey(node.InnerText))
+                            {
+                                values.Add(value);
+                                dic.Add(node.InnerText, value);
+                            }
+                        
                         }
                     }
                     catch (Exception e)
